@@ -1,5 +1,3 @@
-console.log('Hello World!');
-
 var dataNum = 100;
 var clusterNum = 4;
 var centroid = true;
@@ -11,10 +9,7 @@ var centroidArr = []
 clusterColor = ['#a00', '#aa0', '#0a0', '#00a', '#0aa']
 centroidColor = ['#f00', '#ff0', '#0f0', '#00f', '#0ff']
 
-
-
-// 二つの正規分布などからサンプリングしたい
-var svg = d3.select('body')
+var svg = d3.select('#drawArea')
     .append('div')
     .attr({
         'id': 'main'
@@ -155,7 +150,6 @@ function init () {
             y: parseInt(normalRand(80 * rand + 100, 20), 10),
             cluster: parseInt(Math.random() * clusterNum, 10) + 1
         }
-        console.log('x = ' + obj.x, 'y = ' + obj.y)
         dataset.push(obj);
     }
 
@@ -172,14 +166,9 @@ function init () {
             cx : function(d){ return d.x; },
             cy : function(d){ return d.y; },
             r : 0,
-            // height : function(d){ return d; },
             'cluster' : function(d){ return d.cluster; }
-            // fill : function(d){ return clusterColor[d.cluster]; }
         })
         .transition()
-        // .delay(function(d, i){
-        //     return i * 5;
-        // }) 
         .duration(150)
         .ease('bounce')
         .attr({
@@ -199,7 +188,6 @@ function firstCluster () {
 
 function calCentroid () {
     var dataset = d3.selectAll('.data')[0];    
-    console.log(d3.selectAll('.centroid'));
     var notMove = 0;
     
     // 重心の作成
@@ -208,8 +196,7 @@ function calCentroid () {
             "x": d3.mean(dataset, function (d) {
                 x = d.getAttribute('cx');
                 cluster = d.getAttribute('cluster');
-                // console.log('x=' + x, ' cluster=' + cluster)
-
+                
                 if (cluster == i) {
                     return parseInt(x, 10);
                 }
@@ -234,7 +221,6 @@ function calCentroid () {
     }
 
     if (notMove >= clusterNum) {
-        console.log('完了');
         d3.selectAll('.processDescription')
             .style({
                 'background-color': function (d, i) {
@@ -249,10 +235,6 @@ function calCentroid () {
     }
 
     if (d3.selectAll('.centroid')[0].length > 0) {
-        console.log('あるよ！');
-        // for (var i = 1; i <= centroidArr.length; i++) {
-        //     console.log(svg.selectAll('.cluster' + i));
-
         svg.selectAll('.centroid')
             .data(centroidArr)
             .transition()
@@ -262,9 +244,7 @@ function calCentroid () {
                 cx : function(d) { return d.x; },
                 cy : function(d) { return d.y; }
             });
-        // }
     } else {
-        console.log('ないよ！');
          // データを点として打つ
         svg.selectAll('rect')
             .data(centroidArr)
@@ -306,21 +286,17 @@ function calDistance() {
                     cluster = 0;
 
                     for (var i = 1; i <= clusterNum; i++) {
-                        // console.log(centroidArr[i - 1].x, centroidArr[i - 1].y)
                         // ユークリッド距離の計算
                         distance = 
                             Math.sqrt(
                                 Math.pow((centroidArr[i - 1].x - d.x), 2) + Math.pow((centroidArr[i - 1].y - d.y), 2)
                             );
 
-                        // console.log(distance);
                         if (min >= distance) {
                             min = distance;
                             cluster = i;
                         }
                     }
-                    // console.log(cluster);
-                    // console.log(this);
                     return clusterColor[cluster];
                },
                cluster: function (d) {
@@ -333,28 +309,25 @@ function calDistance() {
                             Math.sqrt(
                                 Math.pow((centroidArr[i - 1].x - d.x), 2) + Math.pow((centroidArr[i - 1].y - d.y), 2)
                             );
-
-                        // console.log(distance);
                         if (min >= distance) {
                             min = distance;
                             cluster = i;
                         }
                     }
-                    // console.log(cluster);
                     return cluster;
                }
             });
     centroid = true;
 }
-// }
 
-function normalRand (m, s) {
+// 正規分布を作成
+function normalRand (mean, sigma) {
     var a = 1 - Math.random();
     var b = 1 - Math.random();
     var c = Math.sqrt(-2 * Math.log(a));
     if(0.5 - Math.random() > 0) {
-        return c * Math.sin(Math.PI * 2 * b) * s + m;
+        return c * Math.sin(Math.PI * 2 * b) * sigma + mean;
     }else{
-        return c * Math.cos(Math.PI * 2 * b) * s + m;
+        return c * Math.cos(Math.PI * 2 * b) * sigma + mean;
     }
 };
